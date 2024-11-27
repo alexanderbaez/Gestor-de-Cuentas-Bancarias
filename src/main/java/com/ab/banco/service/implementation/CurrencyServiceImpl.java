@@ -1,20 +1,18 @@
-package com.ab.banco.service;
+package com.ab.banco.service.implementation;
 
-import com.ab.banco.models.Currency;
-import com.ab.banco.repository.CurrencyRepository;
-import jakarta.annotation.PostConstruct;
+import com.ab.banco.persistence.models.Currency;
+import com.ab.banco.persistence.repository.CurrencyRepository;
+import com.ab.banco.service.interfaces.ICurrencyservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CurrencyService {
+public class CurrencyServiceImpl implements ICurrencyservice {
     @Autowired
     private CurrencyRepository currencyRepository;
 

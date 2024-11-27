@@ -1,17 +1,17 @@
-package com.ab.banco.service;
+package com.ab.banco.service.implementation;
 
-import com.ab.banco.models.User;
-import com.ab.banco.repository.UserRepositoty;
+import com.ab.banco.persistence.models.User;
+import com.ab.banco.persistence.repository.UserRepositoty;
+import com.ab.banco.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserServiceImpl implements IUserService {
 
     @Autowired
     private UserRepositoty userRepositoty;

@@ -1,14 +1,14 @@
-package com.ab.banco.mappers;
+package com.ab.banco.util.mapper;
 
 import com.ab.banco.dtos.*;
-import com.ab.banco.models.Account;
-import com.ab.banco.models.BankMovements;
-import com.ab.banco.models.Currency;
-import com.ab.banco.models.User;
-import com.ab.banco.repository.CurrencyRepository;
+import com.ab.banco.persistence.models.Account;
+import com.ab.banco.persistence.models.BankMovements;
+import com.ab.banco.persistence.models.Currency;
+import com.ab.banco.persistence.models.User;
+import com.ab.banco.presentation.controllers.dtos.*;
+import com.ab.banco.presentation.dtos.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring")//creamos un bean de Spring para que podamos autoinyectarlo donde lo necesitemos.
 public interface UserMapper {

@@ -1,6 +1,6 @@
-package com.ab.banco.repository;
+package com.ab.banco.persistence.repository;
 
-import com.ab.banco.models.Currency;
+import com.ab.banco.persistence.models.Currency;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

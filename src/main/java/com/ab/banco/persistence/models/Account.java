@@ -1,4 +1,4 @@
-package com.ab.banco.models;
+package com.ab.banco.persistence.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

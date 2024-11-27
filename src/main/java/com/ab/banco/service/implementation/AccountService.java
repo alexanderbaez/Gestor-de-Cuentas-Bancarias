@@ -1,13 +1,13 @@
-package com.ab.banco.service;
+package com.ab.banco.service.implementation;
 
-import com.ab.banco.dtos.AccountCreateDTO;
-import com.ab.banco.models.Account;
-import com.ab.banco.models.BankMovements;
-import com.ab.banco.models.Currency;
-import com.ab.banco.models.User;
-import com.ab.banco.repository.AccountRepository;
-import com.ab.banco.repository.BankMovementsRepository;
-import com.ab.banco.repository.CurrencyRepository;
+import com.ab.banco.persistence.models.Account;
+import com.ab.banco.persistence.models.Currency;
+import com.ab.banco.persistence.models.User;
+import com.ab.banco.persistence.repository.AccountRepository;
+import com.ab.banco.persistence.repository.BankMovementsRepository;
+import com.ab.banco.persistence.repository.CurrencyRepository;
+import com.ab.banco.service.interfaces.IAccountService;
+import com.ab.banco.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,14 +16,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 @Service
-public class AccountService {
+public class AccountService implements IAccountService {
 
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
     private BankMovementsRepository bankMovementsRepository;
     @Autowired
-    private UserService userService;
+    private IUserService iUserService;
     @Autowired
     private CurrencyRepository currencyRepository;
 
@@ -31,7 +31,7 @@ public class AccountService {
     //traemos las cuentas del usuarios
     public List<Account> getAccountByUser(Long userId){
 
-        if (!userService.existsById(userId)){
+        if (!iUserService.existsById(userId)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado con Id: "+ userId);
         }
         List<Account> accounts = accountRepository.findByUserId(userId);
@@ -43,7 +43,7 @@ public class AccountService {
 
     //traemos una cuenta especifica de un usuario
     public Account getAccountByUserAndId(Long userId, Long accountId){
-        if (!userService.existsById(userId)){
+        if (!iUserService.existsById(userId)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado con Id: "+userId);
         }
         return accountRepository.findByIdAndUserId(accountId,userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta con Id "+accountId+" no fue encontrada"));
@@ -52,7 +52,7 @@ public class AccountService {
     // metodo para crear una nueva cuenta
     public Account createAccount(Account account) {
         // Verificamos el usuario
-        if (!userService.existsById(account.getUser().getId())) {
+        if (!iUserService.existsById(account.getUser().getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado con Id: "+ account.getUser().getId());
         }
         // Verificamos la divisa
@@ -80,7 +80,7 @@ public class AccountService {
 
     // Eliminar una cuenta
     public void deleteAccount(Long userId, Long accountId) {
-        if (!userService.existsById(userId)) {
+        if (!iUserService.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado con ID: " + userId);
         }
         Account account = accountRepository.findByIdAndUserId(accountId, userId)
@@ -90,7 +90,7 @@ public class AccountService {
 
     // Modificar una cuenta
     public Account updateAccount(Long userId, Long accountId, Account account) {
-        if (!userService.existsById(userId)) {
+        if (!iUserService.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado con ID: " + userId);
         }
         Account existingAccount = accountRepository.findByIdAndUserId(accountId, userId)

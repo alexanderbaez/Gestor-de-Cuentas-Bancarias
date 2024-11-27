@@ -1,4 +1,4 @@
-package com.ab.banco.dtos;
+package com.ab.banco.presentation.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

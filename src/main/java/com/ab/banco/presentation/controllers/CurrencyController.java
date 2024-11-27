@@ -1,9 +1,9 @@
-package com.ab.banco.controllers;
+package com.ab.banco.presentation.controllers;
 
-import com.ab.banco.dtos.CurrencyDTO;
-import com.ab.banco.mappers.UserMapper;
-import com.ab.banco.models.Currency;
-import com.ab.banco.service.CurrencyService;
+import com.ab.banco.presentation.dtos.CurrencyDTO;
+import com.ab.banco.util.mapper.UserMapper;
+import com.ab.banco.persistence.models.Currency;
+import com.ab.banco.service.interfaces.ICurrencyservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class CurrencyController {
 
     @Autowired
-    private CurrencyService currencyService;
+    private ICurrencyservice iCurrencyservice;
     @Autowired
     private UserMapper userMapper;
 
@@ -27,7 +27,7 @@ public class CurrencyController {
     @GetMapping
     public ResponseEntity<List<CurrencyDTO>> getAllCurrencies(){
         //obtenemos todas las entidades de moneda
-        List<Currency> currencies = currencyService.getAllCurrencies();
+        List<Currency> currencies = iCurrencyservice.getAllCurrencies();
         //convertimos las entidades en dto
         List<CurrencyDTO> currencyDTOS = currencies.stream().map(userMapper::currencyToCurrencyDTO).collect(Collectors.toList());
         return ResponseEntity.ok(currencyDTOS);
@@ -38,7 +38,7 @@ public class CurrencyController {
     @GetMapping(value = "/{id}")
     public ResponseEntity<CurrencyDTO> getCurrencyById(@PathVariable Long id){
         //obtenemos la moneda desde el servicio
-        Optional<Currency> currency = currencyService.getCurrencyById(id);
+        Optional<Currency> currency = iCurrencyservice.getCurrencyById(id);
         return currency.map(currency1 -> ResponseEntity.ok(userMapper.currencyToCurrencyDTO(currency1))).orElse(ResponseEntity.notFound().build());
     }
 
@@ -49,7 +49,7 @@ public class CurrencyController {
         //convertimos el dto en una entidad
         Currency currency = userMapper.currencyDTOToCurrency(currencyDTO);
         //creamos la moneda
-        Currency createCurrency = currencyService.CreateCurrency(currency);
+        Currency createCurrency = iCurrencyservice.CreateCurrency(currency);
         //convertimos la entidad a dto para enviarla al cliente
         CurrencyDTO createCurrencyDTO = userMapper.currencyToCurrencyDTO(createCurrency);
         return ResponseEntity.status(HttpStatus.CREATED).body(createCurrencyDTO);
@@ -61,7 +61,7 @@ public class CurrencyController {
         //convertimos el dto en una entidad
         Currency currency = userMapper.currencyDTOToCurrency(currencyDTO);
         //actualizamos la moneda
-        Currency updateCurrncy = currencyService.updateCurrency(id,currency);
+        Currency updateCurrncy = iCurrencyservice.updateCurrency(id,currency);
         //convertimos la entidad en dto
         CurrencyDTO updateCurrencyDTO = userMapper.currencyToCurrencyDTO(updateCurrncy);
         return ResponseEntity.ok(updateCurrencyDTO);
@@ -71,7 +71,7 @@ public class CurrencyController {
     @CrossOrigin
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> deleteCurrency(@PathVariable Long id){
-     currencyService.deleteCurrency(id);
+     iCurrencyservice.deleteCurrency(id);
      return ResponseEntity.noContent().build();
     }
 }

@@ -1,7 +1,5 @@
-package com.ab.banco.dtos;
+package com.ab.banco.presentation.dtos;
 
-import com.ab.banco.models.Account;
-import com.ab.banco.models.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
