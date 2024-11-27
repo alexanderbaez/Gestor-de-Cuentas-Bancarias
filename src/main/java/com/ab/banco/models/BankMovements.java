@@ -17,18 +17,22 @@ public class BankMovements {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String origen; // Nombre de la cuenta de origen
-    private String destino; // Nombre de la cuenta de destino
-    private BigDecimal monto; // Monto transferido
-    private LocalDateTime fecha; // Fecha de la transferencia
+    private BigDecimal monto;
+    private LocalDateTime fecha;
 
     @ManyToOne
     @JoinColumn(name = "currency_id")//relacion con la tabla de monedas
-    private Currency currency; //la moneda del movimiento bancario
-
+    private Currency currency;
     @ManyToOne
-    @JoinColumn(name = "account_id") // Cambia el nombre según tu necesidad
-    @JsonIgnore // Evitamos la recursividad al serializar
+    @JoinColumn(name = "account_id")
+    @JsonIgnore // evitamos la recursividad al serializar
     private Account account; // Relación con la cuenta
+    @ManyToOne
+    @JoinColumn(name = "user_origen_id")//relacion con el usuario
+    @JsonIgnore
+    private User userOrigen;
+    @ManyToOne
+    @JoinColumn(name = "user_destino_id")
+    @JsonIgnore
+    private User userDestino;
 }

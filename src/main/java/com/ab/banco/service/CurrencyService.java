@@ -4,7 +4,10 @@ import com.ab.banco.models.Currency;
 import com.ab.banco.repository.CurrencyRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +20,12 @@ public class CurrencyService {
 
     //traemos todas las divisas
    public List<Currency> getAllCurrencies(){
-       return currencyRepository.findAll();
+       List<Currency> currencies = currencyRepository.findAll();
+       //verificamos
+       if (currencies.isEmpty()){
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay divisas");
+       }
+       return currencies;
    }
 
    //traemos una divisa por id
@@ -29,33 +37,31 @@ public class CurrencyService {
    public Currency CreateCurrency(Currency currency){
        //verificamos si hay duplicado
        if (currencyRepository.findByNameOrSymbol(currency.getName(), currency.getSymbol()).isPresent()){
-           throw new RuntimeException("Ya existe una moneda con el nombre o simbolo");
+           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Ya existe una divisa con el nombre o simbolo");
        }
-
        return currencyRepository.save(currency);
    }
 
    //modificamos una divisa
-    public Optional<Currency> updateCurrency(Long id, Currency currency){
+    public Currency updateCurrency(Long id, Currency currency){
+       //verificamos divisa
        if (!currencyRepository.existsById(id)){
-           return Optional.empty();
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Divisa no encontrada");
        }
-
        //verificamos si existe una moneda con el nombre o simbolo
         //si el nombre o el simbolo ya esta presente....
         if (currencyRepository.findByNameOrSymbol(currency.getName(), currency.getSymbol()).isPresent()){
-            throw new RuntimeException("Ya existe una moneda con este nombre o simbolo");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe una divisa con nombre o simbolo");
         }
        currency.setId(id);
-       return Optional.of(currencyRepository.save(currency));
+       return currencyRepository.save(currency);
     }
 
     //eliminamos una divisa
-    public Boolean deleteCurrency(Long id){
+    public void deleteCurrency(Long id){
        if (currencyRepository.existsById(id)){
-           currencyRepository.deleteById(id);
-           return true;
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Divisa no encontrada");
        }
-       return false;
+       currencyRepository.deleteById(id);
     }
 }
