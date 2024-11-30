@@ -35,4 +35,16 @@ public class BankMovements {
     @JoinColumn(name = "user_destino_id")
     @JsonIgnore
     private User userDestino;
+
+    //agregamos un campo de tipo enum para los movimientos
+    @Enumerated(EnumType.STRING)
+    private MovimientoTipo tipo;
+
+    //estos son los tipos de movimiento que existen
+    public enum MovimientoTipo{
+        DEPOSITO,
+        RETIRO,
+        TRANSFERENCIA
+    }
+
 }

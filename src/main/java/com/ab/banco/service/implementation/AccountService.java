@@ -1,6 +1,7 @@
 package com.ab.banco.service.implementation;
 
 import com.ab.banco.persistence.models.Account;
+import com.ab.banco.persistence.models.BankMovements;
 import com.ab.banco.persistence.models.Currency;
 import com.ab.banco.persistence.models.User;
 import com.ab.banco.persistence.repository.AccountRepository;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -74,9 +77,8 @@ public class AccountService implements IAccountService {
 
     public Currency findCurrencyById(Long currencyId) {
         Optional<Currency> currencyOpt = currencyRepository.findById(currencyId);
-        return currencyOpt.orElse(null);  // Retorna null si no se encuentra la divisa
+        return currencyOpt.orElse(null);  // retorna null si no se encuentra la divisa
     }
-
 
     // Eliminar una cuenta
     public void deleteAccount(Long userId, Long accountId) {
@@ -85,7 +87,7 @@ public class AccountService implements IAccountService {
         }
         Account account = accountRepository.findByIdAndUserId(accountId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta con ID " + accountId + " no fue encontrada"));
-        accountRepository.delete(account); // Eliminamos la cuenta
+        accountRepository.delete(account); // rliminamos la cuenta
     }
 
     // Modificar una cuenta
@@ -100,5 +102,98 @@ public class AccountService implements IAccountService {
         existingAccount.setCurrency(account.getCurrency()); // actualizamos la divisa (si es necesario)
 
         return accountRepository.save(existingAccount);
+    }
+
+    //realizar un deposito
+    public BankMovements deposit(Long accountId, BigDecimal monto){
+        Account account = accountRepository.findById(accountId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+
+        //actualizamos saldo
+        account.setBalance(account.getBalance().add(monto));
+        accountRepository.save(account);
+
+        //registamos el movimiento del deposito
+        BankMovements movement = new BankMovements();
+
+        movement.setMonto(monto);
+        movement.setFecha(LocalDateTime.now());
+        movement.setAccount(account);
+        movement.setUserOrigen(account.getUser());
+        movement.setUserDestino(null);
+        movement.setCurrency(account.getCurrency());
+        movement.setTipo(BankMovements.MovimientoTipo.DEPOSITO);
+
+        return bankMovementsRepository.save(movement);
+    }
+
+    //realizamos un retiro
+    public BankMovements withdraw (Long accountId, BigDecimal monto){
+        Account account = accountRepository.findById(accountId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+
+        //verificamos el saldo de la cuenta
+        if (account.getBalance().compareTo(monto)<0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente para realizar el retiro");
+        }
+        //actualizamos saldo
+        account.setBalance(account.getBalance().subtract(monto));
+        accountRepository.save(account);
+
+        //registramos el movimiento del retiro
+        BankMovements movement = new BankMovements();
+        movement.setMonto(monto.negate());
+        movement.setFecha(LocalDateTime.now());
+        movement.setAccount(account);
+        movement.setUserOrigen(account.getUser());
+        movement.setUserDestino(null);
+        movement.setCurrency(account.getCurrency());
+        movement.setTipo(BankMovements.MovimientoTipo.RETIRO);
+
+        return bankMovementsRepository.save(movement);
+    }
+
+    //realizamos transderencia
+    public List<BankMovements> transfer(Long  sourceAccountId, Long destinationAccountId, BigDecimal monto){
+        Account sourceAccount = accountRepository.findById(sourceAccountId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta de origen no encontrada"));
+        Account destinationAccount = accountRepository.findById(destinationAccountId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta de destino no encontrada"));
+
+        //vamos a verificar si la cuenta origen tiene saldo para realizar la transferencia
+        if (sourceAccount.getBalance().compareTo(monto)<0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Saldo insuficiente para realizar la transferencia");
+        }
+
+        //actualizamos el saldo de las cuentas
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(monto));
+        destinationAccount.setBalance(destinationAccount.getBalance().add(monto));
+
+        //guardamos
+        accountRepository.save(sourceAccount);
+        accountRepository.save(destinationAccount);
+
+        //registramoe el movimiento de la transferencia para la cuenta origen
+        BankMovements movementFromSource = new BankMovements();
+        movementFromSource.setMonto(monto.negate());
+        movementFromSource.setFecha(LocalDateTime.now());
+        movementFromSource.setAccount(sourceAccount);
+        movementFromSource.setUserOrigen(sourceAccount.getUser());
+        movementFromSource.setUserDestino(destinationAccount.getUser());
+        movementFromSource.setCurrency(sourceAccount.getCurrency());
+        movementFromSource.setTipo(BankMovements.MovimientoTipo.TRANSFERENCIA);
+
+        //registramos el movimineto de la transferencia para la cuenta destino
+        BankMovements movementToDestination = new BankMovements();
+        movementToDestination.setMonto(monto);
+        movementToDestination.setFecha(LocalDateTime.now());
+        movementToDestination.setAccount(destinationAccount);
+        movementToDestination.setUserOrigen(sourceAccount.getUser());
+        movementToDestination.setUserDestino(destinationAccount.getUser());
+        movementToDestination.setCurrency(destinationAccount.getCurrency());
+        movementToDestination.setTipo(BankMovements.MovimientoTipo.TRANSFERENCIA);
+
+        //guardamos los movimientos en la base de datos
+        bankMovementsRepository.save(movementFromSource);
+        bankMovementsRepository.save(movementToDestination);
+
+        //devolvemos la lista de movimiento
+        return List.of(movementFromSource,movementToDestination);
     }
 }

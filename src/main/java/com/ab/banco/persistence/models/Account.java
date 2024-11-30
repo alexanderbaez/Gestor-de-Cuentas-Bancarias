@@ -28,7 +28,7 @@ public class Account {
         @JoinColumn(name = "currency_id")//relacion con la tabla de monedas
         private Currency currency;
         @Column(name = "ultima_actualizacion")
-        private LocalDateTime lastUdate; // Última vez que se actualizó el saldo
+        private LocalDateTime lastUdate; // ultima vez que se actualizo el saldo
         @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<BankMovements> movements = new ArrayList<>();
         @ManyToOne

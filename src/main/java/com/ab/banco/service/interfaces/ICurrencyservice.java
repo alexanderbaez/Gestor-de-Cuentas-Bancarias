@@ -13,7 +13,7 @@ public interface ICurrencyservice {
         //traemos una divisa por id
         public Optional<Currency> getCurrencyById(Long id);
 
-        //Creamos una nueva divisa
+        //creamos una nueva divisa
         public Currency CreateCurrency(Currency currency);
 
         //modificamos una divisa

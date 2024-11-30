@@ -57,6 +57,7 @@
             UserDTO savedUserDTO = userMapper.userToUserDTO(saveUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUserDTO);
         }
+
         //eliminamos un usuario
         @CrossOrigin
         @DeleteMapping(value = "/{id}")
@@ -64,6 +65,7 @@
             iUserService.deleteUser(id);
             return ResponseEntity.noContent().build();
         }
+
         //modificamos un usuario
         @CrossOrigin
         @PutMapping(value = "/{id}")
@@ -76,5 +78,4 @@
             UserDTO updateUserDTO = userMapper.userToUserDTO(updateUser);
             return ResponseEntity.ok(updateUserDTO);
         }
-
     }
