@@ -52,6 +52,18 @@ public class AccountService implements IAccountService {
         return accountRepository.findByIdAndUserId(accountId,userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta con Id "+accountId+" no fue encontrada"));
     }
 
+    //traemos los movimientos historicos de una cuenta bancaria
+    public List<BankMovements> getMovementsByAccount(Long accountId){
+
+        Account account = accountRepository.findById(accountId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+
+        List<BankMovements> movements = bankMovementsRepository.findByAccountId(accountId);
+        if (movements.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta con Id: "+accountId+" no tiene movimientos historicos");
+        }
+        return movements;
+    }
+
     // metodo para crear una nueva cuenta
     public Account createAccount(Account account) {
         // Verificamos el usuario

@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +47,22 @@ public class AccountController {
         Account account = iAccountService.getAccountByUserAndId(userId,accountId);
         AccountDTO accountDTO = userMapper.accountToAccountDTO(account);
         return ResponseEntity.ok(accountDTO);
+    }
+
+    //traemos lo movimientos historicos de una cuenta
+    @CrossOrigin
+    @GetMapping(value = "/{accountId}/movements")
+    public ResponseEntity<List<BankMovementDTO>> getAccountMovements(@PathVariable Long userId, @PathVariable Long accountId){
+        if (!iUserService.existsById(userId)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        //obtenemos los movimientos
+        List<BankMovements> movements = iAccountService.getMovementsByAccount(accountId);
+
+        List<BankMovementDTO> movementDTOS = movements.stream().map(userMapper::bankmovementToBankMovementDTO).collect(Collectors.toList());
+
+        return ResponseEntity.ok(movementDTOS);
     }
 
     // Crear una nueva cuenta para un usuario

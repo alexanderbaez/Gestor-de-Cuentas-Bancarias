@@ -17,6 +17,9 @@ public interface IAccountService {
     //traemos una cuenta especifica de un usuario
     public Account getAccountByUserAndId(Long userId, Long accountId);
 
+    //traemos los movimientos historicos de cada cuenta
+    public List<BankMovements> getMovementsByAccount(Long accountId);
+
     // metodo para crear una nueva cuenta
     public Account createAccount(Account account);
 
